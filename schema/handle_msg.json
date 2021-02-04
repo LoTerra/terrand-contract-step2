@@ -12,13 +12,13 @@
           "type": "object",
           "required": [
             "msg_g2",
-            "previous_signature"
+            "signature"
           ],
           "properties": {
             "msg_g2": {
               "$ref": "#/definitions/Binary"
             },
-            "previous_signature": {
+            "signature": {
               "$ref": "#/definitions/Binary"
             }
           }

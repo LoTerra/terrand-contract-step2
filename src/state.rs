@@ -2,10 +2,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use cosmwasm_std::{Binary, Storage};
-use cosmwasm_storage::{
-    singleton, singleton_read, ReadonlySingleton,
-    Singleton,
-};
+use cosmwasm_storage::{singleton, singleton_read, ReadonlySingleton, Singleton};
 
 pub static CONFIG_KEY: &[u8] = b"config";
 
@@ -14,10 +11,10 @@ pub struct State {
     pub drand_public_key: Binary,
 }
 
-pub fn config(storage: &mut dyn Storage) -> Singleton<State> {
+pub fn config<S: Storage>(storage: &mut S) -> Singleton<S, State> {
     singleton(storage, CONFIG_KEY)
 }
 
-pub fn config_read(storage: &dyn Storage) -> ReadonlySingleton<State> {
+pub fn config_read<S: Storage>(storage: &S) -> ReadonlySingleton<S, State> {
     singleton_read(storage, CONFIG_KEY)
 }

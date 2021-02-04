@@ -3,9 +3,7 @@ use std::fs::create_dir_all;
 
 use cosmwasm_schema::{export_schema, export_schema_with_title, remove_schemas, schema_for};
 
-use drand_lottery::msg::{
-    ConfigResponse, HandleMsg, InitMsg,
-};
+use drand_lottery::msg::{ConfigResponse, HandleMsg, InitMsg};
 use drand_lottery::state::State;
 
 fn main() {
