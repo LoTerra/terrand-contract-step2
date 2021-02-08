@@ -1,7 +1,4 @@
-use cosmwasm_std::{
-    to_binary, Api, Binary, CanonicalAddr, CosmosMsg, Env, Extern, HandleResponse, HumanAddr,
-    InitResponse, Querier, StdResult, Storage, WasmMsg,
-};
+use cosmwasm_std::{to_binary, Api, Binary, CosmosMsg, Env, Extern, HandleResponse, HumanAddr, InitResponse, Querier, StdResult, Storage, WasmMsg, StdError};
 
 use crate::msg::{ConfigResponse, HandleMsg, InitMsg, QueryMsg};
 use crate::state::{config, config_read, State};
@@ -97,7 +94,7 @@ pub fn verify<S: Storage, A: Api, Q: Querier>(
     env: Env,
     signature: Binary,
     msg_g2: Binary,
-    worker: CanonicalAddr,
+    worker: HumanAddr,
     round: u64,
 ) -> StdResult<HandleResponse> {
     // Load state
@@ -140,10 +137,9 @@ fn query_config<S: Storage, A: Api, Q: Querier>(
     Ok(state)
 }
 fn query_verify_callback<S: Storage, A: Api, Q: Querier>(
-    deps: &Extern<S, A, Q>,
-) -> StdResult<ConfigResponse> {
-    let state = config_read(&deps.storage).load()?;
-    Ok(state)
+    _deps: &Extern<S, A, Q>,
+) -> StdResult<StdError> {
+   Err(StdError::Unauthorized { backtrace: None })
 }
 
 #[cfg(test)]
@@ -165,10 +161,7 @@ mod tests {
         let msg = HandleMsg::Verify {
             signature: signature,
             msg_g2: Binary::from(g2_binary),
-            worker: deps
-                .api
-                .canonical_address(&HumanAddr::from("address"))
-                .unwrap(),
+            worker: HumanAddr::from("address"),
             round: 12323,
         };
 

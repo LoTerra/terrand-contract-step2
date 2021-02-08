@@ -1,5 +1,5 @@
 use crate::state::State;
-use cosmwasm_std::{Binary, CanonicalAddr};
+use cosmwasm_std::{Binary, HumanAddr};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -15,7 +15,7 @@ pub enum QueryMsg {
         round: u64,
         randomness: Binary,
         valid: bool,
-        worker: CanonicalAddr,
+        worker: HumanAddr,
     },
 }
 
@@ -25,7 +25,7 @@ pub enum HandleMsg {
     Verify {
         signature: Binary,
         msg_g2: Binary,
-        worker: CanonicalAddr,
+        worker: HumanAddr,
         round: u64,
     },
 }
