@@ -1,6 +1,6 @@
 [package]
 name = "drand-oracle-p2"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["0xantman <antho74830@gmail.com>"]
 edition = "2018"
 
