@@ -1,4 +1,7 @@
-use cosmwasm_std::{to_binary, Api, Binary, CosmosMsg, Env, Extern, HandleResponse, HumanAddr, InitResponse, Querier, StdResult, Storage, WasmMsg, StdError};
+use cosmwasm_std::{
+    to_binary, Api, Binary, CosmosMsg, Env, Extern, HandleResponse, HumanAddr, InitResponse,
+    Querier, StdError, StdResult, Storage, WasmMsg,
+};
 
 use crate::msg::{ConfigResponse, HandleMsg, InitMsg, QueryMsg};
 use crate::state::{config, config_read, State};
@@ -139,7 +142,7 @@ fn query_config<S: Storage, A: Api, Q: Querier>(
 fn query_verify_callback<S: Storage, A: Api, Q: Querier>(
     _deps: &Extern<S, A, Q>,
 ) -> StdResult<StdError> {
-   Err(StdError::Unauthorized { backtrace: None })
+    Err(StdError::Unauthorized { backtrace: None })
 }
 
 #[cfg(test)]
