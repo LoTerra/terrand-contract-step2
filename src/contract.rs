@@ -116,7 +116,7 @@ pub fn verify<S: Storage, A: Api, Q: Querier>(
     };
     let res = encode_msg(msg, env.message.sender)?;
     Ok(HandleResponse {
-        messages: vec![res.into()],
+        messages: vec![res],
         data: None,
         log: vec![],
     })
