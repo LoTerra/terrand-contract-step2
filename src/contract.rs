@@ -1,7 +1,7 @@
-use cosmwasm_std::{to_binary, Api, Binary, CosmosMsg, Env, Extern, HandleResponse, HumanAddr, InitResponse, Querier, StdError, StdResult, Storage, WasmMsg, Response, MessageInfo, DepsMut, Deps};
+use cosmwasm_std::{to_binary, Binary, CosmosMsg, Env, StdError, StdResult, WasmMsg, Response, MessageInfo, DepsMut, Deps, entry_point};
 
-use crate::msg::{ConfigResponse, HandleMsg, InitMsg, QueryMsg, InstantiateMsg, ExecuteMsg};
-use crate::state::{config, config_read, State, Config, CONFIG};
+use crate::msg::{ConfigResponse, QueryMsg, InstantiateMsg, ExecuteMsg};
+use crate::state::{Config, CONFIG};
 use fff::Field;
 use groupy::CurveAffine;
 use paired::bls12_381::{Bls12, Fq12, G1Affine, G2Affine};
@@ -33,7 +33,7 @@ pub fn instantiate(
 
 pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
     match msg {
-        HandleMsg::Verify {
+        ExecuteMsg::Verify {
             signature,
             msg_g2,
             worker,
@@ -89,7 +89,7 @@ fn encode_msg(msg: QueryMsg, address: String) -> StdResult<CosmosMsg> {
 
 pub fn verify(
     deps: DepsMut,
-    env: Env,
+    _env: Env,
     info: MessageInfo,
     signature: Binary,
     msg_g2: Binary,
@@ -110,7 +110,7 @@ pub fn verify(
         valid: is_valid,
         worker,
     };
-    let res = encode_msg(msg, env.message.sender)?;
+    let res = encode_msg(msg, info.sender.to_string())?;
     Ok(Response {
         submessages: vec![],
         messages: vec![res],
@@ -129,14 +129,14 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 }
 
 fn query_config(
-    deps: deps,
+    deps: Deps,
 ) -> StdResult<ConfigResponse> {
     let config = CONFIG.load(deps.storage)?;
     Ok(config)
 }
 fn query_verify_callback(
-    _deps: deps,
-) -> StdResult<StdError> {
+    _deps: Deps,
+) -> StdResult<Response> {
     Err(StdError::generic_err("Not authorized"))
 }
 
@@ -157,7 +157,7 @@ mod tests {
         let signature: Binary = hex::decode("a75c1b05446c28e9babb078b5e4887761a416b52a2f484bcb388be085236edacc72c69347cb533da81e01fe26f1be34708855b48171280c6660e2eb736abe214740ce696042879f01ba5613808a041b54a80a43dadb5a6be8ed580be7e3f546e").unwrap().into();
         let g2_binary = hex::decode("8332743e3c325954435e289d757183e9d3d0b64055cf7f8610b0823d6fd2c0ec2a9ce274fd2eec85875225f89dcdda710fb11cce31d0fa2b4620bbb2a2147502f921ceb95d29b402b55b69b609e51bb759f94c32b7da12cb91f347b12740cb52").unwrap();
         println!("{}, {:?}", signature, g2_binary);
-        let msg = HandleMsg::Verify {
+        let msg = ExecuteMsg::Verify {
             signature: signature,
             msg_g2: Binary::from(g2_binary),
             worker:"address".to_string(),
@@ -165,6 +165,6 @@ mod tests {
         };
         let res = execute(deps.as_mut(), env, info, msg).unwrap();
         println!("{:?}", res);
-        assert_eq!(0, res.log.len());
+        assert_eq!(0, res.attributes.len());
     }
 }
