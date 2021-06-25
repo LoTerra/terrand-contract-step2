@@ -1,9 +1,9 @@
-use crate::state::State;
-use cosmwasm_std::{Binary, HumanAddr};
+use crate::state::Config;
+use cosmwasm_std::Binary;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct InitMsg {}
+pub struct InstantiateMsg {}
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -15,19 +15,19 @@ pub enum QueryMsg {
         round: u64,
         randomness: Binary,
         valid: bool,
-        worker: HumanAddr,
+        worker: String,
     },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-pub enum HandleMsg {
+pub enum ExecuteMsg {
     Verify {
         signature: Binary,
         msg_g2: Binary,
-        worker: HumanAddr,
+        worker: String,
         round: u64,
     },
 }
 // We define a custom struct for each query response
-pub type ConfigResponse = State;
+pub type ConfigResponse = Config;
