@@ -1,6 +1,9 @@
-use cosmwasm_std::{to_binary, Binary, CosmosMsg, Env, StdError, StdResult, WasmMsg, Response, MessageInfo, DepsMut, Deps, entry_point};
+use cosmwasm_std::{
+    entry_point, to_binary, Binary, CosmosMsg, Deps, DepsMut, Env, MessageInfo, Response, StdError,
+    StdResult, WasmMsg,
+};
 
-use crate::msg::{ConfigResponse, QueryMsg, InstantiateMsg, ExecuteMsg};
+use crate::msg::{ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
 use crate::state::{Config, CONFIG};
 use fff::Field;
 use groupy::CurveAffine;
@@ -128,15 +131,11 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     Ok(response)
 }
 
-fn query_config(
-    deps: Deps,
-) -> StdResult<ConfigResponse> {
+fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
     let config = CONFIG.load(deps.storage)?;
     Ok(config)
 }
-fn query_verify_callback(
-    _deps: Deps,
-) -> StdResult<Response> {
+fn query_verify_callback(_deps: Deps) -> StdResult<Response> {
     Err(StdError::generic_err("Not authorized"))
 }
 
@@ -150,7 +149,7 @@ mod tests {
     fn verify_test() {
         let mut deps = mock_dependencies(&[]);
         let init_msg = InstantiateMsg {};
-        let env= mock_env();
+        let env = mock_env();
         let info = mock_info("sender", &[]);
         instantiate(deps.as_mut(), env.clone(), info.clone(), init_msg).unwrap();
 
@@ -160,7 +159,7 @@ mod tests {
         let msg = ExecuteMsg::Verify {
             signature: signature,
             msg_g2: Binary::from(g2_binary),
-            worker:"address".to_string(),
+            worker: "address".to_string(),
             round: 12323,
         };
         let res = execute(deps.as_mut(), env, info, msg).unwrap();

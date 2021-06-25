@@ -1,5 +1,5 @@
-use crate::state::{Config};
-use cosmwasm_std::{Binary};
+use crate::state::Config;
+use cosmwasm_std::Binary;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
