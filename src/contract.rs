@@ -86,7 +86,7 @@ fn encode_msg(msg: QueryMsg, address: String) -> StdResult<CosmosMsg> {
     Ok(WasmMsg::Execute {
         contract_addr: address,
         msg: to_binary(&msg)?,
-        send: vec![],
+        funds: vec![],
     }
     .into())
 }
@@ -115,12 +115,8 @@ pub fn verify(
         worker,
     };
     let res = encode_msg(msg, info.sender.to_string())?;
-    Ok(Response {
-        submessages: vec![],
-        messages: vec![res],
-        attributes: vec![],
-        data: None,
-    })
+
+    Ok(Response::new().add_message(res))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
