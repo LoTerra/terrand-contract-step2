@@ -216,7 +216,7 @@ dependencies = [
 
 [[package]]
 name = "drand-oracle-p2"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",

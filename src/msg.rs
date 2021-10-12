@@ -10,13 +10,6 @@ pub struct InstantiateMsg {}
 pub enum QueryMsg {
     /// Get the config state
     Config {},
-    /// Not used to be call directly
-    VerifyCallBack {
-        round: u64,
-        randomness: Binary,
-        valid: bool,
-        worker: String,
-    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
