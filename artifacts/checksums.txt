@@ -1,1 +1,1 @@
-b4f350c73740bc60350661c162ee8ca78babd7001d13269ee8ab40d7ba5fb8c9  drand_oracle_p2.wasm
+6e7fff851ea4861d194f5b8ba98930c2d8395248116f07016feefeafae3ddb03  drand_oracle_p2.wasm
