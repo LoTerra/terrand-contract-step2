@@ -1,6 +1,5 @@
 use cosmwasm_std::{
-    entry_point, to_binary, Binary, CosmosMsg, Deps, DepsMut, Env, MessageInfo, Response, StdError,
-    StdResult, WasmMsg,
+    entry_point, to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
 };
 
 use crate::msg::{ConfigResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
@@ -10,6 +9,7 @@ use groupy::CurveAffine;
 use paired::bls12_381::{Bls12, Fq12, G1Affine, G2Affine};
 use paired::{Engine, PairingCurveAffine};
 
+use crate::error::ContractError;
 use drand_verify::{derive_randomness, g1_from_variable, g2_from_variable, VerificationError};
 
 // Note, you can use StdResult in some functions where you do not
@@ -20,7 +20,7 @@ pub fn instantiate(
     _env: Env,
     _info: MessageInfo,
     _msg: InstantiateMsg,
-) -> StdResult<Response> {
+) -> Result<Response, ContractError> {
     let config = Config {
         drand_public_key: vec![
             134, 143, 0, 94, 184, 230, 228, 202, 10, 71, 200, 167, 124, 234, 165, 48, 154, 71, 151,
@@ -35,7 +35,12 @@ pub fn instantiate(
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> StdResult<Response> {
+pub fn execute(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    msg: ExecuteMsg,
+) -> Result<Response, ContractError> {
     match msg {
         ExecuteMsg::Verify {
             signature,
@@ -82,24 +87,15 @@ fn verify_step2(
     Ok(fast_pairing_equality(&g1, &sigma, pk, msg_on_g2))
 }
 
-fn encode_msg(msg: QueryMsg, address: String) -> StdResult<CosmosMsg> {
-    Ok(WasmMsg::Execute {
-        contract_addr: address,
-        msg: to_binary(&msg)?,
-        funds: vec![],
-    }
-    .into())
-}
-
 pub fn verify(
     deps: DepsMut,
     _env: Env,
-    info: MessageInfo,
+    _info: MessageInfo,
     signature: Binary,
     msg_g2: Binary,
     worker: String,
     round: u64,
-) -> StdResult<Response> {
+) -> Result<Response, ContractError> {
     // Load config
     let config = CONFIG.load(deps.storage)?;
     // To affine
@@ -108,22 +104,21 @@ pub fn verify(
     // Verify
     let is_valid = verify_step2(&pk_to_g1affine, &signature.as_slice(), &msg_to_g2affine).unwrap();
     let randomness = derive_randomness(signature.as_slice());
-    let msg = QueryMsg::VerifyCallBack {
-        round,
-        randomness: Binary::from(randomness),
-        valid: is_valid,
-        worker,
-    };
-    let res = encode_msg(msg, info.sender.to_string())?;
 
-    Ok(Response::new().add_message(res))
+    if !is_valid {
+        return Err(ContractError::Unauthorized {});
+    }
+
+    Ok(Response::new()
+        .add_attribute("round", round.to_string())
+        .add_attribute("randomness", Binary::from(randomness).to_string())
+        .add_attribute("worker", worker))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     let response = match msg {
         QueryMsg::Config {} => to_binary(&query_config(deps)?)?,
-        QueryMsg::VerifyCallBack { .. } => to_binary(&query_verify_callback(deps)?)?,
     };
     Ok(response)
 }
@@ -131,9 +126,6 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 fn query_config(deps: Deps) -> StdResult<ConfigResponse> {
     let config = CONFIG.load(deps.storage)?;
     Ok(config)
-}
-fn query_verify_callback(_deps: Deps) -> StdResult<Response> {
-    Err(StdError::generic_err("Not authorized"))
 }
 
 #[cfg(test)]
@@ -161,6 +153,6 @@ mod tests {
         };
         let res = execute(deps.as_mut(), env, info, msg).unwrap();
         println!("{:?}", res);
-        assert_eq!(0, res.attributes.len());
+        assert_eq!(3, res.attributes.len());
     }
 }
