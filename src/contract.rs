@@ -141,7 +141,7 @@ mod tests {
 
     #[test]
     fn verify_test() {
-        let mut deps = mock_dependencies(&[]);
+        let mut deps = mock_dependencies();
         let init_msg = InstantiateMsg {};
         let env = mock_env();
         let info = mock_info("sender", &[]);
